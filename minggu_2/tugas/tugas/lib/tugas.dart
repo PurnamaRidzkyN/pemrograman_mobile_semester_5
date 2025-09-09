@@ -1,5 +1,6 @@
 import 'dart:io';
 
+// bmi
 void bmi() {
   // Input berat
   stdout.write("Masukkan berat badan (kg): ");
@@ -30,7 +31,7 @@ void bmi() {
   }
 }
 
-// Fungsi pangkat sederhana (exp harus integer)
+// calculator 
 double power(double base, int exp) {
   double result = 1;
   for (int i = 0; i < exp; i++) {
@@ -39,9 +40,93 @@ double power(double base, int exp) {
   return result;
 }
 
+double evaluate(String expr) {
+  // Hapus spasi
+  expr = expr.replaceAll(' ', '');
+
+  // Tokenize dengan dukung angka negatif
+  List<String> tokens = [];
+  String numBuffer = '';
+  for (int i = 0; i < expr.length; i++) {
+    String c = expr[i];
+    if ('+-*/%^'.contains(c)) {
+      if (c == '-' && (i == 0 || '+-*/%^('.contains(expr[i - 1]))) {
+        // Minus sebagai tanda negatif
+        numBuffer += c;
+      } else {
+        if (numBuffer != '') tokens.add(numBuffer);
+        tokens.add(c);
+        numBuffer = '';
+      }
+    } else {
+      numBuffer += c;
+    }
+  }
+  if (numBuffer != '') tokens.add(numBuffer);
+
+  // Proses ^ (pangkat)
+  for (int i = 0; i < tokens.length; i++) {
+    if (tokens[i] == '^') {
+      double left = double.parse(tokens[i - 1]);
+      int right = int.parse(tokens[i + 1]);
+      double res = power(left, right);
+
+      tokens[i - 1] = res.toString();
+      tokens.removeAt(i);
+      tokens.removeAt(i);
+      i--;
+    }
+  }
+
+  // Proses * / %
+  for (int i = 0; i < tokens.length; i++) {
+    if (tokens[i] == '*' || tokens[i] == '/' || tokens[i] == '%') {
+      double left = double.parse(tokens[i - 1]);
+      double right = double.parse(tokens[i + 1]);
+      double res;
+
+      if (tokens[i] == '*')
+        res = left * right;
+      else if (tokens[i] == '/') {
+        if (right == 0) throw Exception("Pembagian 0!");
+        res = left / right;
+      } else {
+        res = left % right;
+      }
+
+      tokens[i - 1] = res.toString();
+      tokens.removeAt(i);
+      tokens.removeAt(i);
+      i--;
+    }
+  }
+
+  // Proses + -
+  double result = double.parse(tokens[0]);
+  for (int i = 1; i < tokens.length; i += 2) {
+    String op = tokens[i];
+    double num = double.parse(tokens[i + 1]);
+    if (op == '+') result += num;
+    if (op == '-') result -= num;
+  }
+
+  return result;
+}
+
+double evaluateWithParentheses(String expr) {
+  while (expr.contains('(')) {
+    int closeIndex = expr.indexOf(')');
+    int openIndex = expr.lastIndexOf('(', closeIndex);
+    String inner = expr.substring(openIndex + 1, closeIndex);
+    double innerResult = evaluateWithParentheses(inner);
+    expr = expr.replaceRange(openIndex, closeIndex + 1, innerResult.toString());
+  }
+  return evaluate(expr);
+}
+
 void calculator() {
-  print("=== Kalkulator Dart Murni dengan Angka Negatif & Pangkat ===");
-  print("Contoh input: -2 ^ 3 * 4 + 5");
+  print("=== Kalkulator Dart dengan Kurung, Pangkat & Negatif ===");
+  print("Contoh input: (2 + 3) * (4 ^ 2 - 1)");
   print("Ketik 'exit' untuk keluar");
 
   while (true) {
@@ -54,75 +139,15 @@ void calculator() {
     }
 
     try {
-      input = input.replaceAll(' ', '');
-
-      List<String> tokens = [];
-      String numBuffer = '';
-      for (int i = 0; i < input.length; i++) {
-        String c = input[i];
-        if ('+-*/%^'.contains(c)) {
-          if (c == '-' && (i == 0 || '+-*/%^'.contains(input[i - 1]))) {
-            numBuffer += c;
-          } else {
-            if (numBuffer != '') tokens.add(numBuffer);
-            tokens.add(c);
-            numBuffer = '';
-          }
-        } else {
-          numBuffer += c;
-        }
-      }
-      if (numBuffer != '') tokens.add(numBuffer);
-
-      for (int i = 0; i < tokens.length; i++) {
-        if (tokens[i] == '^') {
-          double left = double.parse(tokens[i - 1]);
-          int right = int.parse(tokens[i + 1]);
-          double res = power(left, right);
-
-          tokens[i - 1] = res.toString();
-          tokens.removeAt(i);
-          tokens.removeAt(i);
-          i--;
-        }
-      }
-
-      for (int i = 0; i < tokens.length; i++) {
-        if (tokens[i] == '*' || tokens[i] == '/' || tokens[i] == '%') {
-          double left = double.parse(tokens[i - 1]);
-          double right = double.parse(tokens[i + 1]);
-          double res;
-
-          if (tokens[i] == '*')
-            res = left * right;
-          else if (tokens[i] == '/') {
-            if (right == 0) throw Exception("Pembagian 0!");
-            res = left / right;
-          } else
-            res = left % right;
-
-          tokens[i - 1] = res.toString();
-          tokens.removeAt(i);
-          tokens.removeAt(i);
-          i--;
-        }
-      }
-
-      double result = double.parse(tokens[0]);
-      for (int i = 1; i < tokens.length; i += 2) {
-        String op = tokens[i];
-        double num = double.parse(tokens[i + 1]);
-        if (op == '+') result += num;
-        if (op == '-') result -= num;
-      }
-
+      double result = evaluateWithParentheses(input);
       print("Hasil: $result");
     } catch (e) {
-      print("Error: pastikan format ekspresi benar!");
+      print("Error: ${e.toString()}");
     }
   }
 }
 
+//koversi units 
 double convertTemperature(double value, String from, String to) {
   from = from.toUpperCase();
   to = to.toUpperCase();

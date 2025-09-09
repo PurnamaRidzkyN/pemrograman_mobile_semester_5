@@ -28,7 +28,7 @@ void latihan2() {
 }
 
 latihan3() {
-  String username = 'budi123';
+  String username = 'asep123';
   String password = 'pass123';
   int umur = 17;
   bool isUsernameValid = username.length >= 6;
@@ -61,10 +61,10 @@ void latihan4() {
 void latihan5() {
   // Data nilai mahasiswa
   Map<String, int> nilaiMahasiswa = {
-    'Matematika': 85,
-    'Fisika': 75,
-    'Pemrograman': 90,
-    'Bahasa Inggris': 80,
+    'Matematika': 99,
+    'Fisika': 99,
+    'Pemrograman': 99,
+    'Bahasa Inggris': 99,
   };
 
   // Hitung total dan rata-rata
